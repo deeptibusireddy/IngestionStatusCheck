@@ -12,8 +12,12 @@ Secondary experience:
 
 1. Python 3.8+ installed.
 2. These files in the project root:
-   - `IngestedURLs.xlsx`
-   - `BlockedURLs.xlsx`
+   - `IngestedURLs.xlsx` or `IngestedURLs.csv`
+   - `BlockedURLs.xlsx` or `BlockedURLs.csv`
+
+Notes:
+- The app tries `.xlsx` first and automatically falls back to `.csv`.
+- CSV fallback is useful when Excel files are encrypted/protected.
 
 ## Quick Start (Web UI - Recommended)
 

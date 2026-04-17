@@ -550,7 +550,12 @@
                         data.blocked_file ? data.blocked_count.toLocaleString() : '⚠️ Missing';
 
                     if (!data.ingested_file || !data.blocked_file) {
-                        showError('⚠️ Database files not found. Make sure IngestedURLs.xlsx and BlockedURLs.xlsx are in the same folder as this app.');
+                        showError('⚠️ Database files not found. Add IngestedURLs.xlsx or IngestedURLs.csv, and BlockedURLs.xlsx or BlockedURLs.csv, in this folder.');
+                        return;
+                    }
+
+                    if (data.errors && data.errors.length > 0) {
+                        showError('⚠️ Database load issue: ' + data.errors.join(' | '));
                     }
                 })
                 .catch(e => {
@@ -653,7 +658,10 @@
             })
             .then(data => {
                 if (data.error) {
-                    showError(data.error);
+                    const details = Array.isArray(data.details) && data.details.length
+                        ? ' ' + data.details.join(' | ')
+                        : '';
+                    showError(data.error + details);
                 } else {
                     currentResults = data.results;
                     displayResults(data.results, data.counts);
