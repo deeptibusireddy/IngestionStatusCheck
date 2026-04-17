@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+.venv/
+venv/
+
+# Editor
+.vscode/
+
+# Local data files (do not commit)
+IngestedURLs.xlsx
+BlockedURLs.xlsx
+*.xls
+*.xlsx
+
+# Generated outputs
+audit_results/
+tmp_*.txt
+tmp_*.csv
+
+# OS
+.DS_Store
+Thumbs.db

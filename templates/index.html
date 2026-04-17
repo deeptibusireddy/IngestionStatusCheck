@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Checker - Ingestion Link Audit</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 1000px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        header {
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .status-bar {
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 30px;
+            font-size: 13px;
+        }
+
+        .status-bar.error {
+            background: #fee;
+            border-color: #f99;
+        }
+
+        .status-bar.success {
+            background: #efe;
+            border-color: #9f9;
+        }
+
+        .status-item {
+            display: inline-block;
+            margin-right: 30px;
+            color: #666;
+        }
+
+        .status-value {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .input-section {
+            margin-bottom: 30px;
+        }
+
+        .input-tabs {
+            display: flex;
+            gap: 0;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .input-tab {
+            padding: 12px 20px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            color: #999;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.2s;
+        }
+
+        .input-tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .input-tab:hover {
+            color: #333;
+        }
+
+        .input-content {
+            display: none;
+        }
+
+        .input-content.active {
+            display: block;
+        }
+
+        .upload-area {
+            border: 2px dashed #ddd;
+            border-radius: 6px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.2s;
+            cursor: pointer;
+            background: #fafafa;
+        }
+
+        .upload-area:hover {
+            border-color: #667eea;
+            background: #f5f5ff;
+        }
+
+        .upload-area.dragover {
+            border-color: #667eea;
+            background: #f0f0ff;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .upload-icon {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .upload-text {
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .upload-hint {
+            color: #999;
+            font-size: 12px;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .section-title {
+            color: #333;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title::before {
+            content: "";
+            display: inline-block;
+            width: 4px;
+            height: 16px;
+            background: #667eea;
+            border-radius: 2px;
+            margin-right: 10px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 120px;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-family: "Monaco", "Courier New", monospace;
+            font-size: 13px;
+            resize: vertical;
+            transition: border-color 0.2s;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .input-hint {
+            font-size: 12px;
+            color: #999;
+            margin-top: 8px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 11px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+            flex: 1;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .btn-secondary:disabled {
+            background: #e0e0e0;
+            cursor: not-allowed;
+            color: #999;
+        }
+
+        .results-section {
+            margin-top: 40px;
+            display: none;
+        }
+
+        .results-section.show {
+            display: block;
+        }
+
+        .results-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .result-card {
+            background: #f9f9f9;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .result-card.found {
+            background: #f0fdf4;
+            border-color: #86efac;
+        }
+
+        .result-card.blocked {
+            background: #fef2f2;
+            border-color: #fca5a5;
+        }
+
+        .result-card.missing {
+            background: #fef3c7;
+            border-color: #fcd34d;
+        }
+
+        .result-label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .result-count {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .result-count.found { color: #16a34a; }
+        .result-count.blocked { color: #dc2626; }
+        .result-count.missing { color: #d97706; }
+
+        .results-table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        thead {
+            background: #f5f5f5;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        th {
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        tbody tr:hover {
+            background: #fafafa;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+
+        .status-badge.found {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-badge.blocked {
+            background: #fee2e2;
+            color: #7f1d1d;
+        }
+
+        .status-badge.missing {
+            background: #fef3c7;
+            color: #78350f;
+        }
+
+        .url-cell {
+            font-family: "Monaco", "Courier New", monospace;
+            font-size: 12px;
+            word-break: break-all;
+            max-width: 300px;
+        }
+
+        .reason-cell {
+            color: #666;
+            font-size: 12px;
+        }
+
+        .guids-cell {
+            font-family: "Monaco", "Courier New", monospace;
+            font-size: 11px;
+            color: #999;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            background: #fee;
+            border: 1px solid #f99;
+            color: #c33;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+
+        .success-message {
+            background: #efe;
+            border: 1px solid #9f9;
+            color: #3a3;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 22px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .results-summary {
+                grid-template-columns: 1fr;
+            }
+
+            .results-table-wrapper {
+                font-size: 12px;
+            }
+
+            th, td {
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔗 URL Checker</h1>
+            <p class="subtitle">Ingestion Link Audit - Check URLs against your database</p>
+        </header>
+
+        <div class="status-bar" id="statusBar">
+            <div class="status-item">
+                📊 Ingested URLs: <span class="status-value" id="ingestedCount">Loading...</span>
+            </div>
+            <div class="status-item">
+                🚫 Blocked URLs: <span class="status-value" id="blockedCount">Loading...</span>
+            </div>
+        </div>
+
+        <div id="errorContainer"></div>
+
+        <div class="input-section">
+            <label class="section-title">Enter URLs to Check</label>
+            
+            <div class="input-tabs">
+                <button class="input-tab active" onclick="switchTab('paste')">
+                    📝 Paste URLs
+                </button>
+                <button class="input-tab" onclick="switchTab('upload')">
+                    📤 Upload CSV
+                </button>
+            </div>
+
+            <!-- Paste URLs Tab -->
+            <div id="pasteTab" class="input-content active">
+                <textarea 
+                    id="urlInput" 
+                    placeholder="Paste one URL per line&#10;Examples:&#10;https://example.com/page&#10;https://docs.microsoft.com/en-us/azure&#10;https://contoso.sharepoint.com/sites/demo"
+                ></textarea>
+                <p class="input-hint">💡 Paste one URL per line. The checker will handle formatting differences.</p>
+            </div>
+
+            <!-- Upload CSV Tab -->
+            <div id="uploadTab" class="input-content">
+                <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+                    <div class="upload-icon">📁</div>
+                    <div class="upload-text">Click to upload or drag files here</div>
+                    <div class="upload-hint">CSV file with one URL per line</div>
+                </div>
+                <input type="file" id="fileInput" accept=".csv,.txt" onchange="handleFileSelect()" />
+                <p class="input-hint" style="margin-top: 15px;">💡 Upload a CSV or TXT file with one URL per line. First row will be checked as data or header.</p>
+                <p id="fileStatus" class="input-hint" style="display: none; margin-top: 10px; color: #667eea;"></p>
+            </div>
+
+            <div class="button-group">
+                <button class="btn-primary" id="auditBtn" onclick="runAudit()">
+                    🔍 Run Audit
+                </button>
+                <button class="btn-secondary" id="clearBtn" onclick="clearInput()">
+                    Clear
+                </button>
+            </div>
+        </div>
+
+        <div class="results-section" id="resultsSection">
+            <div class="section-title">Audit Results</div>
+
+            <div class="results-summary" id="resultsSummary">
+                <!-- Results cards will be inserted here -->
+            </div>
+
+            <div class="results-table-wrapper">
+                <table id="resultsTable">
+                    <thead>
+                        <tr>
+                            <th>URL</th>
+                            <th>Status</th>
+                            <th>Reason</th>
+                            <th>GUIDs Found</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultsBody">
+                        <!-- Results will be inserted here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentResults = [];
+        let selectedFile = null;
+
+        // Load status on page load
+        window.addEventListener('load', function() {
+            fetch('/api/status')
+                .then(r => r.json())
+                .then(data => {
+                    document.getElementById('ingestedCount').textContent = 
+                        data.ingested_file ? data.ingested_count.toLocaleString() : '⚠️ Missing';
+                    document.getElementById('blockedCount').textContent = 
+                        data.blocked_file ? data.blocked_count.toLocaleString() : '⚠️ Missing';
+
+                    if (!data.ingested_file || !data.blocked_file) {
+                        showError('⚠️ Database files not found. Make sure IngestedURLs.xlsx and BlockedURLs.xlsx are in the same folder as this app.');
+                    }
+                })
+                .catch(e => {
+                    showError('Failed to load database status: ' + e);
+                });
+
+            // Setup file upload drag and drop
+            const uploadArea = document.getElementById('uploadArea');
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('dragover');
+            });
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    document.getElementById('fileInput').files = files;
+                    handleFileSelect();
+                }
+            });
+        });
+
+        function switchTab(tab) {
+            // Update tab buttons
+            document.querySelectorAll('.input-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.input-content').forEach(c => c.classList.remove('active'));
+
+            if (tab === 'paste') {
+                document.querySelectorAll('.input-tab')[0].classList.add('active');
+                document.getElementById('pasteTab').classList.add('active');
+            } else {
+                document.querySelectorAll('.input-tab')[1].classList.add('active');
+                document.getElementById('uploadTab').classList.add('active');
+            }
+        }
+
+        function handleFileSelect() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            const fileStatus = document.getElementById('fileStatus');
+
+            if (file) {
+                selectedFile = file;
+                fileStatus.textContent = `✓ Selected: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+                fileStatus.style.display = 'block';
+                fileStatus.style.color = '#667eea';
+            } else {
+                selectedFile = null;
+                fileStatus.style.display = 'none';
+            }
+        }
+
+        function runAudit() {
+            let formData = new FormData();
+            let activeTab = document.getElementById('pasteTab').classList.contains('active') ? 'paste' : 'upload';
+
+            if (activeTab === 'paste') {
+                const urlText = document.getElementById('urlInput').value.trim();
+                if (!urlText) {
+                    showError('Please enter at least one URL');
+                    return;
+                }
+                formData.append('urls', urlText);
+            } else {
+                if (!selectedFile) {
+                    showError('Please select a file to upload');
+                    return;
+                }
+                formData.append('file', selectedFile);
+            }
+
+            const btn = document.getElementById('auditBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span>Auditing...';
+
+            clearError();
+
+            fetch('/api/audit', {
+                method: 'POST',
+                body: formData
+            })
+            .then(async (r) => {
+                const text = await r.text();
+                let data;
+                try {
+                    data = JSON.parse(text);
+                } catch {
+                    throw new Error(`Server returned non-JSON response (status ${r.status})`);
+                }
+
+                if (!r.ok) {
+                    throw new Error(data.error || `Request failed with status ${r.status}`);
+                }
+
+                return data;
+            })
+            .then(data => {
+                if (data.error) {
+                    showError(data.error);
+                } else {
+                    currentResults = data.results;
+                    displayResults(data.results, data.counts);
+                }
+            })
+            .catch(e => {
+                showError('Error during audit: ' + e);
+            })
+            .finally(() => {
+                btn.disabled = false;
+                btn.innerHTML = '🔍 Run Audit';
+            });
+        }
+
+        function displayResults(results, counts) {
+            const summaryDiv = document.getElementById('resultsSummary');
+            summaryDiv.innerHTML = `
+                <div class="result-card found">
+                    <div class="result-label">Found</div>
+                    <div class="result-count found">${counts.found}</div>
+                </div>
+                <div class="result-card blocked">
+                    <div class="result-label">Blocked</div>
+                    <div class="result-count blocked">${counts.blocked}</div>
+                </div>
+                <div class="result-card missing">
+                    <div class="result-label">Missing</div>
+                    <div class="result-count missing">${counts.missing}</div>
+                </div>
+                <div class="result-card">
+                    <div class="result-label">Total</div>
+                    <div class="result-count" style="color: #667eea;">${counts.total}</div>
+                </div>
+            `;
+
+            const tbody = document.getElementById('resultsBody');
+            tbody.innerHTML = results.map(r => `
+                <tr>
+                    <td class="url-cell">${escapeHtml(r.input)}</td>
+                    <td><span class="status-badge ${r.status}">${r.status}</span></td>
+                    <td class="reason-cell">${escapeHtml(r.reason)}</td>
+                    <td class="guids-cell">${r.guids.length > 0 ? r.guids.join(', ') : '—'}</td>
+                </tr>
+            `).join('');
+
+            document.getElementById('resultsSection').classList.add('show');
+        }
+
+        function clearInput() {
+            document.getElementById('urlInput').value = '';
+            selectedFile = null;
+            document.getElementById('fileInput').value = '';
+            document.getElementById('fileStatus').style.display = 'none';
+            document.getElementById('resultsSection').classList.remove('show');
+            clearError();
+        }
+
+        function showError(msg) {
+            const container = document.getElementById('errorContainer');
+            container.innerHTML = `<div class="error-message">${escapeHtml(msg)}</div>`;
+        }
+
+        function clearError() {
+            document.getElementById('errorContainer').innerHTML = '';
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>

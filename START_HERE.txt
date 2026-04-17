@@ -1,0 +1,56 @@
+Ingestion Link Audit - Quick Start
+
+═══════════════════════════════════════════════════════════════════
+
+⚡ MODERN WAY - Web UI (Recommended)
+
+1) Initial Setup
+   - Make sure you have Python 3.8+ installed
+   - Keep IngestedURLs.xlsx and BlockedURLs.xlsx in this folder
+
+2) Run the Web UI
+   - Double-click: run.bat
+     OR
+   - Open PowerShell and run: powershell -ExecutionPolicy Bypass -File .\run.ps1
+
+3) Use the Web UI
+   - Browser will open to http://localhost:5000
+   - Paste URLs one per line
+   - Click "Run Audit"
+   - View results and download CSV
+
+═══════════════════════════════════════════════════════════════════
+
+📋 CLASSIC WAY - Command Line (Legacy)
+
+Run from PowerShell:
+    powershell -ExecutionPolicy Bypass -File .\ingestion_link_audit.ps1
+
+The script will ask for:
+   - Input file path
+   - Optional output tag
+
+═══════════════════════════════════════════════════════════════════
+
+Output Status Meanings
+
+   - found: URL exists in ingested content.
+   - blocked: URL is in the blocked list.
+   - not-testable: URL requires sign-in; cannot be validated anonymously.
+   - missing: URL not found by URL/path/GUID matching.
+
+═══════════════════════════════════════════════════════════════════
+
+Troubleshooting
+
+Q: "Python is not installed"
+A: Download from python.org and make sure to check "Add Python to PATH"
+
+Q: Database files not found
+A: Make sure IngestedURLs.xlsx and BlockedURLs.xlsx are in this folder
+
+Q: Web UI won't start
+A: Check that port 5000 is not in use. Try:
+   netstat -ano | findstr :5000
+
+═══════════════════════════════════════════════════════════════════
