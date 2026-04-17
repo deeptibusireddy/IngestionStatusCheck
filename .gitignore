@@ -13,8 +13,14 @@ venv/
 # Local data files (do not commit)
 IngestedURLs.xlsx
 BlockedURLs.xlsx
+IngestedURLs.csv
+BlockedURLs.csv
 *.xls
 *.xlsx
+
+# Legacy script copies in repo root (tracked versions live under Archive/Legacy)
+/IngestionStatusCheck.ps1
+/IngestionStatusCheck.py
 
 # Generated outputs
 audit_results/
