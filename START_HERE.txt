@@ -1,4 +1,4 @@
-Ingestion Link Audit - Quick Start
+IngestionStatusCheck - Quick Start
 
 ═══════════════════════════════════════════════════════════════════
 
@@ -17,14 +17,14 @@ Ingestion Link Audit - Quick Start
    - Browser will open to http://localhost:5000
    - Paste URLs one per line
    - Click "Run Audit"
-   - View results and download CSV
+   - View results in the UI
 
 ═══════════════════════════════════════════════════════════════════
 
 📋 CLASSIC WAY - Command Line (Legacy)
 
 Run from PowerShell:
-    powershell -ExecutionPolicy Bypass -File .\ingestion_link_audit.ps1
+   powershell -ExecutionPolicy Bypass -File .\Archive\Legacy\IngestionStatusCheck.ps1
 
 The script will ask for:
    - Input file path

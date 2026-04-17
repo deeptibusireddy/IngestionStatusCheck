@@ -1,0 +1,3 @@
+﻿"input_url","resolved_url","status","match_reason","matched_value","resolve_error"
+"https://example.com/a","","blocked","blocked","https://example.com/a",""
+"https://example.com/missing","","missing","no-match","",""

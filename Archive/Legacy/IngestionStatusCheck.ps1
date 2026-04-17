@@ -7,7 +7,7 @@
     Requires the ImportExcel module (auto-installed on first run, no admin needed).
 
 .EXAMPLE
-    .\ingestion_link_audit.ps1 -InputFile "C:\Path\To\YourURLs.xlsx" -InputSheet "Sheet1" -InputNoHeader
+    .\IngestionStatusCheck.ps1 -InputFile "C:\Path\To\YourURLs.xlsx" -InputSheet "Sheet1" -InputNoHeader
 #>
 [CmdletBinding()]
 param(

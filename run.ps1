@@ -1,8 +1,8 @@
-# URL Checker Web UI - PowerShell Setup & Run Script
+# IngestionStatusCheck Web UI - PowerShell Setup & Run Script
 
 Write-Host ""
 Write-Host "========================================"
-Write-Host "URL Checker - Web UI Setup" -ForegroundColor Cyan
+Write-Host "IngestionStatusCheck - Web UI Setup" -ForegroundColor Cyan
 Write-Host "========================================"
 Write-Host ""
 
@@ -54,7 +54,7 @@ if (-not (Test-Path "BlockedURLs.xlsx")) {
 # Run the app
 Write-Host ""
 Write-Host "========================================"
-Write-Host "Starting URL Checker Web UI..." -ForegroundColor Cyan
+Write-Host "Starting IngestionStatusCheck Web UI..." -ForegroundColor Cyan
 Write-Host "========================================"
 Write-Host ""
 Write-Host "🌐 Open your browser to: http://localhost:5000" -ForegroundColor Green

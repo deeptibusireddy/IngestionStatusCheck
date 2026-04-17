@@ -1,56 +1,71 @@
-# Ingestion Link Audit
+# IngestionStatusCheck
 
-Simple URL audit for ingested content.
+IngestionStatusCheck provides a simple way to validate URLs against your latest ingested and blocked URL lists.
 
-## Setup
+Primary experience:
+- Web UI for single URL checks and CSV uploads
 
-1. In SharePoint, open the document library and click Sync.
-2. Approve the OneDrive prompt.
-3. In the synced local folder, keep these files together:
-   - ingestion_link_audit.ps1
-   - IngestedURLs.xlsx
-   - BlockedURLs.xlsx
+Secondary experience:
+- Legacy PowerShell script (archived)
 
-## Run
+## What You Need
 
-Open PowerShell in the synced folder and run:
+1. Python 3.8+ installed.
+2. These files in the project root:
+   - `IngestedURLs.xlsx`
+   - `BlockedURLs.xlsx`
+
+## Quick Start (Web UI - Recommended)
+
+1. Start the app:
+   - Double-click `run.bat`
+   - Or run PowerShell: `powershell -ExecutionPolicy Bypass -File .\run.ps1`
+2. Open `http://localhost:5000` in your browser.
+3. Choose one input mode:
+   - Paste one URL per line (single URL works too)
+   - Upload `.csv` or `.txt` with one URL per line
+4. Click **Run Audit**.
+5. Review results directly in the UI.
+
+## Status Meanings
+
+- `found`: URL exists in ingested content.
+- `blocked`: URL is in the blocked list.
+- `missing`: URL was not found.
+
+## Legacy CLI (Archived)
+
+If needed, the original script is at:
+- `Archive\Legacy\IngestionStatusCheck.ps1`
+
+Run it with:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\ingestion_link_audit.ps1
+powershell -ExecutionPolicy Bypass -File .\Archive\Legacy\IngestionStatusCheck.ps1
 ```
 
-The script prompts for:
-
-- Input file path
-- Optional output tag
-
-Optional non-interactive run:
+Optional examples:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\ingestion_link_audit.ps1 -InputFile .\YourInputFile.xlsx -OutputTag teamA
+powershell -ExecutionPolicy Bypass -File .\Archive\Legacy\IngestionStatusCheck.ps1 -InputFile .\YourInputFile.xlsx -OutputTag teamA
 ```
-
-Header rows are auto-detected. If needed, force no-header mode:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\ingestion_link_audit.ps1 -InputFile .\YourInputFile.xlsx -InputNoHeader
+powershell -ExecutionPolicy Bypass -File .\Archive\Legacy\IngestionStatusCheck.ps1 -InputFile .\YourInputFile.xlsx -InputNoHeader
 ```
 
-## Output
+## Project Layout
 
-- Default folder: .\audit_results\
-- <inputname>_truly_missing_[tag_]yyyyMMdd_HHmmss.csv
-- <inputname>_match_audit_[tag_]yyyyMMdd_HHmmss.csv
+- `app.py`: Flask backend API.
+- `templates/index.html`: Web UI.
+- `run.bat` and `run.ps1`: local launch scripts.
+- `Archive\`: legacy scripts, sample data, and old temp outputs.
 
-Options:
-- `-OutputFolder <path>` to change where output files are written.
-- `-InputFile <path>` to skip the input prompt.
+## Troubleshooting
 
-### Status Meaning
-
-- found: URL exists in ingested content.
-- blocked: URL is in the blocked list.
-- not-testable: URL requires sign-in; cannot be validated anonymously.
-- missing: URL not found by URL/path/GUID matching.
-
-Run the script from the local synced folder, not from the SharePoint web page.
+- Python not found:
+  Install Python and ensure it is in PATH.
+- Web app does not start:
+  Check if port 5000 is in use: `netstat -ano | findstr :5000`
+- Data files missing in UI:
+  Confirm `IngestedURLs.xlsx` and `BlockedURLs.xlsx` are in the project root.

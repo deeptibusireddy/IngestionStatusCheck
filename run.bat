@@ -1,9 +1,9 @@
 @echo off
-REM URL Checker Web UI Setup & Run Script
+REM IngestionStatusCheck Web UI Setup & Run Script
 
 echo.
 echo ========================================
-echo URL Checker - Web UI Setup
+echo IngestionStatusCheck - Web UI Setup
 echo ========================================
 echo.
 
@@ -53,7 +53,7 @@ if not exist "BlockedURLs.xlsx" (
 REM Run the app
 echo.
 echo ========================================
-echo Starting URL Checker Web UI...
+echo Starting IngestionStatusCheck Web UI...
 echo ========================================
 echo.
 echo 🌐 Open your browser to: http://localhost:5000

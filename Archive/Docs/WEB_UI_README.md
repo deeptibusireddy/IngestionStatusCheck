@@ -1,4 +1,4 @@
-# URL Checker Web UI
+# IngestionStatusCheck Web UI
 
 A modern, browser-based interface for auditing URLs against your ingested and blocked URL databases.
 
@@ -68,7 +68,7 @@ The tool analyzes each URL:
 ## File Structure
 
 ```
-URL.Checker/
+IngestionStatusCheck/
 ├── app.py                    # Flask web server
 ├── requirements.txt          # Python dependencies
 ├── run.bat                   # Windows batch launcher

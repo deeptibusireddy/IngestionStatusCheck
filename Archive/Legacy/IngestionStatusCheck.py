@@ -7,19 +7,19 @@ Why this helps:
 - Optionally matches GUIDs extracted from URLs against a DB GUID column
 
 Usage examples:
-    python ingestion_link_audit.py \
+    python IngestionStatusCheck.py \
     --input missing_urls.txt \
     --db content_export.csv \
     --db-url-column canonical_url \
     --db-guid-column content_id \
     --output truly_missing.csv
 
-    python ingestion_link_audit.py \
+    python IngestionStatusCheck.py \
     --input incoming_urls.csv --input-column url \
     --db db_urls.csv --db-url-column url \
     --no-resolve-redirects
 
-    python ingestion_link_audit.py \
+    python IngestionStatusCheck.py \
         --input input_urls.xlsx --input-sheet Sheet1 \
         --db db_urls.xlsx --db-sheet Sheet1
 """

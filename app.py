@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-URL Checker Web UI - Flask Backend
+IngestionStatusCheck Web UI - Flask Backend
 
 Reads local Excel files (IngestedURLs.xlsx, BlockedURLs.xlsx)
 and provides a REST API for URL auditing.
@@ -299,7 +299,7 @@ def api_status():
 
 
 if __name__ == "__main__":
-    print("Starting URL Checker Web UI...")
+    print("Starting IngestionStatusCheck Web UI...")
     print(f"Database files location: {BASE_DIR}")
     print(f"  - IngestedURLs.xlsx: {INGEST_FILE.exists()}")
     print(f"  - BlockedURLs.xlsx: {BLOCKED_FILE.exists()}")
