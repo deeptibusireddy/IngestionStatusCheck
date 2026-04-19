@@ -29,6 +29,13 @@ GUID_RE = re.compile(
     r"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"
 )
 
+# Azure DevOps wiki URL: extract (org, page_id) key for cross-format matching
+# Matches both GUID and human-readable project/wiki slugs
+ADO_WIKI_RE = re.compile(
+    r"https?://dev\.azure\.com/([^/]+)/[^/]+/_wiki/wikis/[^/]+/([0-9]+)",
+    re.IGNORECASE,
+)
+
 # Tracking parameters to strip
 TRACKING_PREFIXES = ("utm_", "mc_")
 TRACKING_KEYS = {"gclid", "fbclid", "msclkid", "igshid", "yclid", "_hsenc", "_hsmi"}
@@ -153,10 +160,20 @@ def _load_source_with_fallback(
     return None, None, non_fatal
 
 
+def _ado_wiki_key(url: str) -> tuple[str, str] | None:
+    """Return (org_lower, page_id) for Azure DevOps wiki URLs, else None."""
+    m = ADO_WIKI_RE.search(url)
+    if m:
+        return (m.group(1).lower(), m.group(2))
+    return None
+
+
 def load_database():
     """Load ingested and blocked URLs from Excel files."""
     ingested = set()
     blocked = set()
+    # Maps (org, page_id) -> status ("ingested" or "blocked") for ADO wiki cross-format matching
+    ado_wiki_index: dict[tuple[str, str], str] = {}
     errors = []
     
     ing_df, _, ing_errors = _load_source_with_fallback(
@@ -179,6 +196,9 @@ def load_database():
             normalized = normalize_url(str(url))
             if normalized:
                 ingested.add(normalized)
+                key = _ado_wiki_key(normalized)
+                if key:
+                    ado_wiki_index[key] = "ingested"
 
     blk_df, _, blk_errors = _load_source_with_fallback(
         BLOCKED_FILE,
@@ -200,15 +220,25 @@ def load_database():
             normalized = normalize_url(str(url))
             if normalized:
                 blocked.add(normalized)
-    
-    return ingested, blocked, errors
+                key = _ado_wiki_key(normalized)
+                if key:
+                    ado_wiki_index[key] = "blocked"
+
+    return ingested, blocked, ado_wiki_index, errors
 
 
-def audit_urls(urls: list[str], ingested: set[str], blocked: set[str]) -> list[dict]:
+def audit_urls(
+    urls: list[str],
+    ingested: set[str],
+    blocked: set[str],
+    ado_wiki_index: dict[tuple[str, str], str] | None = None,
+) -> list[dict]:
     """
     Audit URLs against ingested and blocked databases.
     Returns list of results with status and reason.
     """
+    if ado_wiki_index is None:
+        ado_wiki_index = {}
     results = []
     
     for input_url in urls:
@@ -236,14 +266,32 @@ def audit_urls(urls: list[str], ingested: set[str], blocked: set[str]) -> list[d
                 "reason": "URL exists in ingested content",
                 "guids": list(guids)
             })
-        # Check if GUID match
+        # Azure DevOps wiki page-ID cross-format match
+        elif (ado_key := _ado_wiki_key(normalized)) and ado_key in ado_wiki_index:
+            db_status = ado_wiki_index[ado_key]
+            results.append({
+                "input": input_url,
+                "normalized": normalized,
+                "status": "blocked" if db_status == "blocked" else "found",
+                "reason": f"ADO wiki page ID match (page {ado_key[1]})",
+                "guids": list(guids)
+            })
+        # Check if GUID match (GUIDs in input URL found in stored URLs)
         elif guids:
             guid_match = None
+            match_status = "found"
             for guid in guids:
-                # Check if ANY URL in ingested contains this GUID
+                for blk_url in blocked:
+                    if guid in blk_url:
+                        guid_match = guid
+                        match_status = "blocked"
+                        break
+                if guid_match:
+                    break
                 for ing_url in ingested:
                     if guid in ing_url:
                         guid_match = guid
+                        match_status = "found"
                         break
                 if guid_match:
                     break
@@ -252,7 +300,7 @@ def audit_urls(urls: list[str], ingested: set[str], blocked: set[str]) -> list[d
                 results.append({
                     "input": input_url,
                     "normalized": normalized,
-                    "status": "found",
+                    "status": match_status,
                     "reason": f"GUID match: {guid_match}",
                     "guids": list(guids)
                 })
@@ -334,7 +382,7 @@ def api_audit():
         return jsonify({"error": "No URLs provided"}), 400
     
     # Load databases
-    ingested, blocked, load_errors = load_database()
+    ingested, blocked, ado_wiki_index, load_errors = load_database()
     if load_errors:
         return jsonify(
             {
@@ -344,7 +392,7 @@ def api_audit():
         ), 400
     
     # Run audit
-    results = audit_urls(urls, ingested, blocked)
+    results = audit_urls(urls, ingested, blocked, ado_wiki_index)
     
     # Count results
     counts = {

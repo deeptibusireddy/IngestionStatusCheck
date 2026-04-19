@@ -10,66 +10,59 @@ Secondary experience:
 
 ## What You Need
 
-1. Python 3.8+ installed.
-2. These files in the project root:
-   - `IngestedURLs.xlsx` or `IngestedURLs.csv`
-   - `BlockedURLs.xlsx` or `BlockedURLs.csv`
+1. **Python 3.8+** — download from [python.org](https://www.python.org/downloads/). During installation, check **"Add Python to PATH"**.
+2. These files in the project root (at least one format each):
+   - `IngestedURLs.xlsx` **or** `IngestedURLs.csv`
+   - `BlockedURLs.xlsx` **or** `BlockedURLs.csv`
 
-Notes:
-- The app tries `.xlsx` first and automatically falls back to `.csv`.
-- CSV fallback is useful when Excel files are encrypted/protected.
+> The app tries `.xlsx` first and automatically falls back to `.csv`. Encrypted/password-protected Excel files are not supported — use CSV instead.
 
-## Quick Start (Web UI - Recommended)
+## Quick Start (Web UI)
 
-1. Start the app:
-   - Double-click `run.bat`
-   - Or run PowerShell: `powershell -ExecutionPolicy Bypass -File .\run.ps1`
+1. Open PowerShell in the project folder and run:
+
+   ```powershell
+   powershell -ExecutionPolicy Bypass -File .\run.ps1
+   ```
+
+   `run.ps1` will automatically create a virtual environment and install all Python dependencies on first run. Subsequent runs skip the install if nothing changed.
+
 2. Open `http://localhost:5000` in your browser.
 3. Choose one input mode:
-   - Paste one URL per line (single URL works too)
-   - Upload `.csv` or `.txt` with one URL per line
+   - Paste one URL per line
+   - Upload a `.csv` or `.txt` with one URL per line
 4. Click **Run Audit**.
 5. Review results directly in the UI.
 
 ## Status Meanings
 
-- `found`: URL exists in ingested content.
-- `blocked`: URL is in the blocked list.
-- `missing`: URL was not found.
+| Status | Meaning |
+|--------|---------|
+| `found` | URL matched in ingested content |
+| `blocked` | URL matched in the blocked list |
+| `missing` | URL was not found in either list |
 
-## Legacy CLI (Archived)
+> Azure DevOps wiki URLs are matched by page ID, so human-readable URLs (e.g. `/Infrastructure%20Solutions/_wiki/…/7975`) will match stored GUID-based equivalents automatically.
 
-If needed, the original script is at:
-- `Archive\Legacy\IngestionStatusCheck.ps1`
+## Troubleshooting
 
-Run it with:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\Archive\Legacy\IngestionStatusCheck.ps1
-```
-
-Optional examples:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\Archive\Legacy\IngestionStatusCheck.ps1 -InputFile .\YourInputFile.xlsx -OutputTag teamA
-```
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\Archive\Legacy\IngestionStatusCheck.ps1 -InputFile .\YourInputFile.xlsx -InputNoHeader
-```
+- **Python not found**: Install from python.org and ensure "Add Python to PATH" was checked. Re-open PowerShell after installing.
+- **Script blocked by execution policy**: Run `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` once, then retry.
+- **Port 5000 in use**: Run `netstat -ano | findstr :5000` to find the blocking process.
+- **Data files missing in UI**: Confirm `IngestedURLs.csv` (or `.xlsx`) and `BlockedURLs.csv` (or `.xlsx`) are in the project root.
 
 ## Project Layout
 
 - `app.py`: Flask backend API.
 - `templates/index.html`: Web UI.
-- `run.bat` and `run.ps1`: local launch scripts.
-- `Archive\`: legacy scripts, sample data, and old temp outputs.
+- `run.ps1`: Setup and launch script (creates venv, installs dependencies, starts server).
+- `requirements.txt`: Python dependencies.
+- `Archive\`: Legacy scripts, sample data, and old temp outputs.
 
-## Troubleshooting
+## Legacy CLI (Archived)
 
-- Python not found:
-  Install Python and ensure it is in PATH.
-- Web app does not start:
-  Check if port 5000 is in use: `netstat -ano | findstr :5000`
-- Data files missing in UI:
-  Confirm `IngestedURLs.xlsx` and `BlockedURLs.xlsx` are in the project root.
+The original PowerShell script is at `Archive\Legacy\IngestionStatusCheck.ps1`.
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\Archive\Legacy\IngestionStatusCheck.ps1
+```
