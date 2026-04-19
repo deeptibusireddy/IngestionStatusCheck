@@ -35,20 +35,26 @@ Write-Host "Installing dependencies (flask, pandas, openpyxl)..."
 pip install -q -r requirements.txt
 Write-Host "✓ Dependencies installed" -ForegroundColor Green
 
-# Check for Excel files
+# Check for database files (accept either .xlsx or .csv for each)
 Write-Host ""
 Write-Host "Checking for database files..."
 
-if (-not (Test-Path "IngestedURLs.xlsx")) {
-    Write-Host "⚠️  Warning: IngestedURLs.xlsx not found" -ForegroundColor Yellow
-    Write-Host "   Make sure this file is in the same folder"
+if (-not (Test-Path "IngestedURLs.xlsx") -and -not (Test-Path "IngestedURLs.csv")) {
+    Write-Host "⚠️  Warning: IngestedURLs.xlsx or IngestedURLs.csv not found" -ForegroundColor Yellow
+    Write-Host "   Add one of these files to the project folder before running the audit."
     Write-Host ""
+} else {
+    $ingFile = if (Test-Path "IngestedURLs.csv") { "IngestedURLs.csv" } else { "IngestedURLs.xlsx" }
+    Write-Host "✓ Ingested URLs: $ingFile" -ForegroundColor Green
 }
 
-if (-not (Test-Path "BlockedURLs.xlsx")) {
-    Write-Host "⚠️  Warning: BlockedURLs.xlsx not found" -ForegroundColor Yellow
-    Write-Host "   Make sure this file is in the same folder"
+if (-not (Test-Path "BlockedURLs.xlsx") -and -not (Test-Path "BlockedURLs.csv")) {
+    Write-Host "⚠️  Warning: BlockedURLs.xlsx or BlockedURLs.csv not found" -ForegroundColor Yellow
+    Write-Host "   Add one of these files to the project folder before running the audit."
     Write-Host ""
+} else {
+    $blkFile = if (Test-Path "BlockedURLs.csv") { "BlockedURLs.csv" } else { "BlockedURLs.xlsx" }
+    Write-Host "✓ Blocked URLs:  $blkFile" -ForegroundColor Green
 }
 
 # Run the app
